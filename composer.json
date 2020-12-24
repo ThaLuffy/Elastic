@@ -7,10 +7,24 @@
         "elasticsearch/elasticsearch": "^7.0",
         "laravel/framework": "^7.0|^8.0"
     },
+    "authors": [
+        {
+            "name": "Stephano Hondeveld",
+            "email": "stephano64@live.nl"
+        }
+    ],
     "autoload": {
       "psr-4": {
         "ThaLuffy\\Elastic\\": "src/"
       }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Jenssegers\\Mongodb\\MongodbServiceProvider",
+                "Jenssegers\\Mongodb\\MongodbQueueServiceProvider"
+            ]
+        }
     },
     "license": "MIT",
     "minimum-stability": "dev"
