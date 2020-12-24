@@ -9,7 +9,7 @@
     },
     "autoload": {
       "psr-4": {
-        "ThaLuffy\\Elastic\\": "src"
+        "ThaLuffy\\Elastic\\": "src/"
       }
     },
     "license": "MIT",
