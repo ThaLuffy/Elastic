@@ -28,6 +28,8 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([
             __DIR__ . '/../database/migrations/' => database_path('migrations')
         ], 'migrations');
+
+        $this->publishes([$this->configPath() => config_path('cors.php')], 'cors');
     }
 
     /**
