@@ -7,6 +7,11 @@
         "elasticsearch/elasticsearch": "^7.0",
         "laravel/framework": "^7.0|^8.0"
     },
+    "autoload": {
+      "psr-4": {
+        "ThaLuffy\\Elastic\\": "src"
+      }
+    },
     "license": "MIT",
     "minimum-stability": "dev"
 }

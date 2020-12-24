@@ -22,7 +22,7 @@ class ServiceProvider extends BaseServiceProvider
 
         $this->commands([
             CreateIndex::class,
-            // IndexRecords::class,
+            IndexRecords::class,
         ]);
 
         $this->publishes([
