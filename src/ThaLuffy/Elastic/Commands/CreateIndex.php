@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libs\ES\Commands;
+namespace ThaLuffy\Elastic\Commands;
 
 use Illuminate\Console\Command;
 

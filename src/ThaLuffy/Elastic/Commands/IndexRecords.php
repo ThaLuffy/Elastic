@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Libs\ES\Commands;
+namespace ThaLuffy\Elastic\Commands;
 
 use Illuminate\Console\Command;
 
-use App\Libs\ES\IndexingLog;
+use ThaLuffy\Elastic\Models\IndexingLog;
 
-use App\Libs\Helpers\Monitoring;
+use ThaLuffy\Elastic\Monitoring;
 
 class IndexRecords extends Command
 {

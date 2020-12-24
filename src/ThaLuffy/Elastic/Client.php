@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libs\ES;
+namespace ThaLuffy\Elastic;
 
 use Illuminate\Support\Facades\Facade;
 
@@ -13,6 +13,6 @@ class Client extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'es.client';
+        return 'elastic.client';
     }
 }

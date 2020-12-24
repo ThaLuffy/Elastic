@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libs\ES;
+namespace ThaLuffy\Elastic\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 

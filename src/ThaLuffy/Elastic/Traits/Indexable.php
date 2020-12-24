@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libs\ES\Traits;
+namespace ThaLuffy\Elastic\Traits;
 
 trait Indexable {
     public static function boot()

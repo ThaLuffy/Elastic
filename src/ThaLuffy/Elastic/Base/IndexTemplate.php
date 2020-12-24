@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Libs\ES\Base;
+namespace ThaLuffy\Elastic\Base;
 
-use App\Libs\ES\Traits\Indexable;
-use App\Libs\ES\Builder;
+use ThaLuffy\Elastic\Traits\Indexable;
+use ThaLuffy\Elastic\Builder;
 
 class IndexTemplate extends Builder
 {

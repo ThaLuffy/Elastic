@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Libs\ES\Base;
+namespace ThaLuffy\Elastic\Base;
 
 use Illuminate\Support\Traits\ForwardsCalls;
 use Str;
 
-use App\Libs\ES\Builder;
+use ThaLuffy\Elastic\Builder;
 
 class BaseIndex {
     use ForwardsCalls;

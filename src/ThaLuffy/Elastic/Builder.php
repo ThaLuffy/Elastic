@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Libs\ES;
+namespace ThaLuffy\Elastic;
 
 use Elasticsearch\ConnectionPool\SniffingConnectionPool;
 
-use App\Libs\ES\Base\BaseIndex;
-use App\Libs\ES\Client;
+use ThaLuffy\Elastic\Base\BaseIndex;
+use ThaLuffy\Elastic\Client;
 
 use Exception;
 use Closure;
