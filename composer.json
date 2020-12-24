@@ -1,0 +1,12 @@
+{
+    "name": "thaluffy/elastic",
+    "description": "Elastic querybuilder for Laravel",
+    "type": "library",
+    "require": {
+        "php": "^7.4|^8.0",
+        "elasticsearch/elasticsearch": "^7.0",
+        "laravel/framework": "^7.0|^8.0"
+    },
+    "license": "MIT",
+    "minimum-stability": "dev"
+}
