@@ -43,16 +43,27 @@ class CreateModel extends Command
      */
     public function handle()
     {
-        $this->name = $this->getNameArgument();
+        $this->name = $this->__getNameArgument();
 
-        $path = $this->makeDirectory(app_path("{$this->indicesFolder}/{$this->name}.php"));
+        $path = $this->__makeDirectory(app_path("{$this->indicesFolder}/{$this->name}.php"));
 
-        $this->files->put($path, $this->buildModel());
+        $this->files->put($path, $this->__buildModel());
 
         $this->info('Successfully created index model at ' . $path);
     }
 
-    private function getNameArgument()
+    private function __makeDirectory($path)
+    {
+        $directory = dirname($path);
+
+        if (!$this->files->isDirectory($directory)) {
+            $this->files->makeDirectory($directory, 0755, true, true);
+        }
+
+        return $path;
+    }
+
+    private function __getNameArgument()
     {
         if (!$this->argument('name')) {
             return $this->ask('Please enter a name for the index model (i.e. UserIndex)');
@@ -61,7 +72,7 @@ class CreateModel extends Command
         return $this->argument('name');
     }
 
-    private function buildModel()
+    private function __buildModel()
     {
         $replace = [
             ':name'          => $this->name,
