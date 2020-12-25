@@ -4,9 +4,8 @@ namespace ThaLuffy\Elastic\Commands;
 
 use Illuminate\Console\Command;
 
-use ThaLuffy\Elastic\Models\IndexingLog;
-
 use ThaLuffy\Elastic\Monitoring;
+use ThaLuffy\Elastic\Helpers;
 
 class IndexRecords extends Command
 {
@@ -56,7 +55,7 @@ class IndexRecords extends Command
         $isMonitoring   = $this->option('monitor');
         $from           = $this->option('from')  ? intval($this->option('from'))  : 0;
         $limit          = $this->option('limit') ? intval($this->option('limit')) : null;
-        $index          = $this->__getIndex();
+        $index          = Helpers::getIndexByName($this->argument('index'));
         $monitor        = new Monitoring();
 
         foreach ($index->getLinkedModels() as $model) {
@@ -136,7 +135,7 @@ class IndexRecords extends Command
                         }
                         
                         if ($errorBatch->count())
-                            IndexingLog::insert($errorBatch->map(fn ($value) => [
+                            Helpers::getIndexLogModel()::insert($errorBatch->map(fn ($value) => [
                                     'document_id' => $value['_id'],
                                     'status'      => $value['status'],
                                     'index'       => $value['_index'],
@@ -212,36 +211,5 @@ class IndexRecords extends Command
         $this->info("Estimated duration for all records: $hours:$minutes:$seconds");
 
         dd("Command cancelled");
-    }
-
-    private function __getIndex()
-    {
-        $indices     = config('es.indices');
-        $index_name  = $this->argument('index');
-        $index       = NULL;
-
-        foreach ($indices as $indexPath) {
-            if ($index_name == class_basename($indexPath)) {
-                $index = new $indexPath();
-                break;
-            }
-        }
-
-        if (!$index) {
-            foreach ($indices as $indexPath) {
-                $index = new $indexPath();
-
-                if ($index->getIndexName() == $index_name)
-                    break;
-                else
-                    $index = NULL;
-            }
-        }
-
-        if (!$index) {
-            throw new \Exception('Index not found');
-        }
-
-        return $index;
     }
 }

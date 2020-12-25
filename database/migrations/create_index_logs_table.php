@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateIndexingLogsTable extends Migration
+class CreateIndexLogsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,14 @@ class CreateIndexingLogsTable extends Migration
      */
     public function up()
     {
-        Schema::create('indexing_logs', function (Blueprint $table) {
+        Schema::create('index_logs', function (Blueprint $table) {
             $table->id();
-            $table->index('status');
-            $table->index('type');
-            $table->index('index');
-            $table->index('model');
-            $table->index('document_id');
-            $table->index('job_id');
+            $table->string('status');
+            $table->string('type');
+            $table->string('index');
+            $table->string('model');
+            $table->string('document_id');
+            $table->string('job_id');
             $table->timestamps();
         });
     }

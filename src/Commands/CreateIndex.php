@@ -4,6 +4,8 @@ namespace ThaLuffy\Elastic\Commands;
 
 use Illuminate\Console\Command;
 
+use ThaLuffy\Elastic\Helpers;
+
 class CreateIndex extends Command
 {
     /**
@@ -39,7 +41,7 @@ class CreateIndex extends Command
     {
         try
         {
-            $index = $this->__getIndex();
+            $index = Helpers::getIndexByName($this->argument('index'));
             $index->createIndex($this->option('recreate'));
 
             $this->line("\n");
@@ -52,36 +54,5 @@ class CreateIndex extends Command
             $this->error($e->getMessage());
             $this->line("\n");
         }
-    }
-
-    private function __getIndex()
-    {
-        $indices     = config('es.indices');
-        $index_name  = $this->argument('index');
-        $index       = NULL;
-
-        foreach ($indices as $indexPath) {
-            if ($index_name == class_basename($indexPath)) {
-                $index = new $indexPath();
-                break;
-            }
-        }
-
-        if (!$index) {
-            foreach ($indices as $indexPath) {
-                $index = new $indexPath();
-
-                if ($index->getIndexName() == $index_name)
-                    break;
-                else
-                    $index = NULL;
-            }
-        }
-
-        if (!$index) {
-            throw new \Exception('Index not found');
-        }
-
-        return $index;
     }
 }

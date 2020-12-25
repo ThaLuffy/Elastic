@@ -6,18 +6,33 @@ return [
     | Indices folder
     |--------------------------------------------------------------------------
     |
-    | Define the folder you want to use for your indices.
+    | Register the folder you want to use for your indices. These indices get
+    | autoloaded so you won't have register them explicitly.
     |
 	*/
     
     'indices_folder' => 'Indices',
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Indices
+    |--------------------------------------------------------------------------
+    |
+    | Register your indices.
+    |
+	*/
+    
+    'indices' => [
+        // Path/To/Index
+    ],
 
     /*
     |--------------------------------------------------------------------------
     | Custom indexing logs model
     |--------------------------------------------------------------------------
     |
-    | Define the folder you want to use for your indices.
+    | Define a custom index log model.
     |
 	*/
     
