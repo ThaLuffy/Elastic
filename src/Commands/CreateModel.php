@@ -20,6 +20,10 @@ class CreateModel extends Command
      */
     protected $description = 'Create Elastic model';
 
+    protected $name;
+
+    protected $indicesFolder;
+
     /**
      * Create a new command instance.
      *
@@ -28,6 +32,8 @@ class CreateModel extends Command
     public function __construct()
     {
         parent::__construct();
+
+        $this->indicesFolder = config('elastic.indices_folder');
     }
 
     /**
@@ -38,8 +44,6 @@ class CreateModel extends Command
     public function handle()
     {
         $this->name = $this->getNameArgument();
-
-        $indicesFolder = config('elastic.indices_folder');
 
         $path = $this->makeDirectory(app_path("$indicesFolder/{$this->name}.php"));
 
@@ -60,7 +64,8 @@ class CreateModel extends Command
     private function buildModel()
     {
         $replace = [
-            ':name' => $this->name,
+            ':name'          => $this->name,
+            ':indicesFolder' => $this->indicesFolder,
         ];
 
         $stubPath = __DIR__ . "/../Stubs/IndexModelStub";

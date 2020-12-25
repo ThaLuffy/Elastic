@@ -6,18 +6,29 @@ return [
     | Indices folder
     |--------------------------------------------------------------------------
     |
-    | Write message here
+    | Define the folder you want to use for your indices.
     |
 	*/
     
-    'indices_folder' => 'App/Indices',
+    'indices_folder' => 'Indices',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Custom indexing logs model
+    |--------------------------------------------------------------------------
+    |
+    | Define the folder you want to use for your indices.
+    |
+	*/
+    
+    'custom_log_model' => null,
 
 	/*
     |--------------------------------------------------------------------------
     | Hosts
     |--------------------------------------------------------------------------
     |
-    | Write message here
+    | Define your Elasticsearch hosts here. You can define multiple hosts.
     |
 	*/
 	

@@ -1,6 +1,6 @@
 <?php
 
-namespace :indexPath;
+namespace App/:indicesFolder;
 
 use ThaLuffy\Elastic\Base\BaseIndex;
 
@@ -20,6 +20,12 @@ class :name extends BaseIndex
 
     protected $settings = [
         // Define your custom settings
+    ];
+
+    protected $scripts = [
+        // Define your scripts here
+
+        // script_name => ` script `;
     ];
 
     // protected $aliases      = [];
