@@ -18,7 +18,7 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function boot()
     {
-        $this->mergeConfigFrom($this->configPath(), 'elastic');
+        $this->mergeConfigFrom($this->__configPath(), 'elastic');
 
         $this->commands([
             CreateIndex::class,
@@ -26,11 +26,11 @@ class ServiceProvider extends BaseServiceProvider
         ]);
 
         $this->publishes([
-            $this->_migrationPath() => database_path('migrations')
+            $this->__migrationPath() => database_path('migrations')
         ], 'migrations');
 
         $this->publishes([
-            $this->_configPath() => config_path('elastic.php')
+            $this->__configPath() => config_path('elastic.php')
         ], 'config');
     }
 
@@ -39,7 +39,7 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @return string
      */
-    protected function _migrationPath()
+    private function __migrationPath()
     {
         return __DIR__ . '/../database/migrations/';
     }
@@ -49,7 +49,7 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @return string
      */
-    protected function _configPath()
+    private function __configPath()
     {
         return __DIR__ . '/../config/elastic.php';
     }
