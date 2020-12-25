@@ -1,6 +1,6 @@
 <?php
 
-namespace App/:indicesFolder;
+namespace App\:indicesFolder;
 
 use ThaLuffy\Elastic\Base\BaseIndex;
 
