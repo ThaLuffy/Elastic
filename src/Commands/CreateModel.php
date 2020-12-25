@@ -3,6 +3,7 @@
 namespace ThaLuffy\Elastic\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Filesystem\Filesystem;
 
 class CreateModel extends Command
 {
