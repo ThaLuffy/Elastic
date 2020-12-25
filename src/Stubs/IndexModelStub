@@ -1,0 +1,28 @@
+<?php
+
+namespace :indexPath;
+
+use ThaLuffy\Elastic\Base\BaseIndex;
+
+class :name extends BaseIndex
+{
+    // Set this to false if you don't want Elasticsearch to map your unmapped fields
+    protected $dynamicMapping = true;
+
+    protected $mappings = [
+        // Define your mapping here
+    ];
+
+    protected $linkedModels = [
+        // YourLinkedModel::class or 'Path/To/Model'
+        // Make sure to use the ThaLuffy/Elastic/Traits/Indexable trait on your models
+    ];
+
+    protected $settings = [
+        // Define your custom settings
+    ];
+
+    // protected $aliases      = [];
+
+    // protected $hosts        = [];
+}

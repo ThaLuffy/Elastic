@@ -26,10 +26,12 @@ class ServiceProvider extends BaseServiceProvider
         ]);
 
         $this->publishes([
-            __DIR__ . '/../database/migrations/' => database_path('migrations')
+            $this->_migrationPath() => database_path('migrations')
         ], 'migrations');
 
-        $this->publishes([$this->configPath() => config_path('cors.php')], 'cors');
+        $this->publishes([
+            $this->_configPath() => config_path('elastic.php')
+        ], 'config');
     }
 
     /**
@@ -37,7 +39,17 @@ class ServiceProvider extends BaseServiceProvider
      *
      * @return string
      */
-    protected function configPath()
+    protected function _migrationPath()
+    {
+        return __DIR__ . '/../database/migrations/';
+    }
+
+    /**
+     * Set the config path
+     *
+     * @return string
+     */
+    protected function _configPath()
     {
         return __DIR__ . '/../config/elastic.php';
     }
