@@ -11,7 +11,7 @@ class CreateModel extends Command
      *
      * @var string
      */
-    protected $signature = 'elastic:model {name}';
+    protected $signature = 'elastic:model {name?}';
 
     /**
      * The console command description.
@@ -45,7 +45,7 @@ class CreateModel extends Command
     {
         $this->name = $this->getNameArgument();
 
-        $path = $this->makeDirectory(app_path("$indicesFolder/{$this->name}.php"));
+        $path = $this->makeDirectory(app_path("{$this->indicesFolder}/{$this->name}.php"));
 
         $this->files->put($path, $this->buildModel());
 
