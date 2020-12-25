@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 use ThaLuffy\Elastic\Commands\CreateIndex;
 use ThaLuffy\Elastic\Commands\IndexRecords;
+use ThaLuffy\Elastic\Commands\CreateModel;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -23,6 +24,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->commands([
             CreateIndex::class,
             IndexRecords::class,
+            CreateModel::class,
         ]);
 
         $this->publishes([
