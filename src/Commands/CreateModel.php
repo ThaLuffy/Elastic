@@ -29,9 +29,11 @@ class CreateModel extends Command
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Filesystem $files)
     {
         parent::__construct();
+
+        $this->files = $files;
 
         $this->indicesFolder = config('elastic.indices_folder');
     }
