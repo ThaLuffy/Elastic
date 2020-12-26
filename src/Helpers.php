@@ -63,7 +63,7 @@ class Helpers
     {
         $index = new $indexPath();
 
-        if ($index_name == class_basename($indexPath)) {
+        if ($indexName == class_basename($indexPath)) {
             return new $indexPath();
         }
 
