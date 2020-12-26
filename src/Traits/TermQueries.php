@@ -25,9 +25,4 @@ trait TermQueries
 
 		return $this;
 	}
-
-	public function range($field, $operator, $value)
-	{
-
-	}
 }
