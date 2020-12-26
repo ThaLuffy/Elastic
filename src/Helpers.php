@@ -25,18 +25,17 @@ class Helpers
         $indexFolders = config('elastic.index_folders');
         $indices      = config('elastic.indices');
 
-        dd($indexFolders, $indices, self::indicesIn(app_path($indexFolders[0])));
+        foreach ($indexFolders as $folder) {
+            $indicesInFolder = self::indicesIn(app_path($folder));
 
-        foreach ($indices as $indexPath) {
-            if ($index_name == class_basename($indexPath)) {
-                return new $indexPath();
+            foreach ($indicesInFolder as $indexPath) {
+                if ($index = self::__matchIndex($indexName, $indexPath))
+                    return $index;
             }
         }
 
         foreach ($indices as $indexPath) {
-            $index = new $indexPath();
-
-            if ($index->getIndexName() == $indexName)
+            if ($index = self::__matchIndex($indexName, $indexPath))
                 return $index;
         }
 
@@ -62,5 +61,19 @@ class Helpers
         static::resources(
             collect($resources)->sort()->all()
         );
+    }
+
+    private static function __matchIndex($indexName, $indexPath)
+    {
+        $index = new $indexPath();
+
+        if ($index_name == class_basename($indexPath)) {
+            return new $indexPath();
+        }
+
+        if ($index->getIndexName() == $indexName)
+            return $index;
+
+        return null;
     }
 }
