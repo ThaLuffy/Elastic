@@ -12,17 +12,15 @@ use Closure;
 
 class Builder
 {
-	protected $client;
-
-	protected $bindings;
-
 	protected $index;
 
-	protected $wheres;
+	protected $must		= [];
 
-	protected $should;
+	protected $filter	= [];
 
-	protected $filters;
+	protected $should	= [];
+
+	protected $mustNot	= [];
 
 	protected $size = 10;
 
@@ -43,11 +41,7 @@ class Builder
 	/**
 	 * Create a new instance for the Query builder
 	 * 
-	 * @param string $indexName
-	 * @param mixed $aliases
-	 * @param mixed $settings
-	 * @param mixed $mappings
-	 * @param mixed $hosts
+	 * @param BaseIndex $index
 	 * 
 	 * @return void
 	 */
@@ -108,6 +102,11 @@ class Builder
 		return $response;
 	}
 	
+	/**
+	 * Update a document by id
+	 * 
+	 * @return mixed
+	 */
 	public function update($id, $values)
 	{
 		$params = [
@@ -209,219 +208,43 @@ class Builder
         return $results['hits']['hits'][0]['_source'];
 	}
 
-	public function should($values)
+	public function must($value)
 	{
-		$this->wheres['filter'] = [
-			'bool' => [
-				'should' => $values
+		$this->must = array_merge($this->must, $value);
+
+		return $this;
+	}
+
+	public function filter($value)
+	{
+		$this->filter = array_merge($this->filter, $value);
+
+		return $this;
+	}
+
+	public function should($value)
+	{
+		$this->should = array_merge($this->should, $value);
+
+		return $this;
+	}
+
+	public function mustNot($value)
+	{
+		$this->mustNot = array_merge($this->mustNot, $value);
+
+		return $this;
+	}
+
+	public function isNull($field)
+	{
+		$this->mustNot[] = [
+			'exists' => [
+				'field' => $field
 			]
 		];
 
 		return $this;
-	}
-
-	public function whereRaw($value)
-	{
-		$this->wheres['must'][] = $value;
-		
-		return $this;
-	}
-
-	public function where($field, $operator = null, $value = null)
-	{
-        $args = func_get_args();
-
-		if (is_array($field) && is_null($operator)) {
-			foreach ($field as $key => $value) {
-				if (is_numeric($key) && is_array($value)) {
-					$this->where(...array_values($value));
-				}
-				else {
-					$this->where($key, '=', $value);
-				}
-			}
-	
-			return $this;
-		}
-
-        if (count($args) === 3) [$field, $operator, $value] = $args;
-		else {
-			$value = $operator;
-			$operator = '=';
-		}
-
-        switch ($operator) {
-			case '=':  return $this->whereIs($field, $value);
-			case '>':  return $this->greaterThan($field, $value);
-			case '<':  return $this->smallerThan($field, $value);
-			case '>=': return $this->greaterEqualThan($field, $value);
-			case '<=': return $this->smallerThan($field, $value);
-			case '!=':
-			case '<>': return $this->whereNot($field, $value);
-		}
-
-		return $this;
-	}
-
-	public function whereMatch($field, $value)
-	{
-		$this->wheres['must'][] = [
-			'match' => [
-				$field => [
-					'query' => $value,
-				]
-			],
-		];
-		
-		return $this;
-	}
-	
-	public function whereIn($field, $values)
-	{
-		$this->wheres['must'][] = [
-			'terms' => [
-				$field => $values,
-			],
-		];
-		
-		return $this;
-	}
-
-	public function whereNotIn($field, $value)
-	{
-		$this->wheres['must_not'][] = [
-			'terms' => [
-				$field => $values,
-			],
-		];
-		
-		return $this;
-	}
-
-	public function whereIs($field, $value)
-	{
-		$this->wheres['must'][] = [
-			'term' => [
-				$field => $value,
-			],
-		];
-		
-		return $this;
-	}
-
-	public function greaterThan($field, $value)
-	{
-		$this->wheres['must'][] = [
-			'range' => [
-				$field => [
-					'gt' => $value,
-				],
-			],
-		];
-
-		return $this;
-	}
-
-	public function greaterEqualThan($field, $value)
-	{
-		$this->wheres['must'][] = [
-			'range' => [
-				$field => [
-					'gte' => $value,
-				],
-			],
-		];
-
-		return $this;
-	}
-
-	public function smallerThan($field, $value)
-	{
-		$this->wheres['must'][] = [
-			'range' => [
-				$field => [
-					'lt' => $value,
-				],
-			],
-		];
-
-		return $this;
-	}
-
-	public function smallerEqualThan($field, $value)
-	{
-		$this->wheres['must'][] = [
-			'range' => [
-				$field => [
-					'lte' => $value,
-				],
-			],
-		];
-		
-		return $this;
-	}
-
-	public function whereNot($field, $value) 
-	{
-		$this->wheres['must_not'][] = [
-			'term' => [
-				$field => $value,
-			],
-		];
-
-		return $this;
-	}
-
-	public function whereGeoInBoundingbox($field, array $topRight, array $bottomLeft)
-	{
-		$this->wheres['filter'] = [
-			"geo_bounding_box" => [
-				$field => [
-					'top_right'   => $topRight,
-					"bottom_left" => $bottomLeft
-				],
-			]
-		];
-
-		return $this;
-	}
-
-	public function whereGeoIn($field, array $coordinates, string $type = "point", string $relation = "contains")
-	{
-		$this->wheres['filter'] = [
-			"geo_shape" => [
-				$field => [
-					'shape' => [
-						"coordinates" => $coordinates,
-						"type" => $type
-					],
-					"relation" => $relation
-				],
-			]
-		];
-
-		return $this;
-	}
-
-	/**
-     * Add a whereBetween condition.
-     *
-     * @param  string  $field
-     * @param  array  $value
-     * @return $this
-     */
-    public function whereBetween($field, array $value)
-    {
-        $this->wheres['must'][] = [
-            'range' => [
-                $field => [
-                    'gte' => $value[0],
-                    'lte' => $value[1],
-                ],
-            ],
-        ];
-
-        return $this;
 	}
 	
 	public function getBody($json = true)
@@ -615,4 +438,16 @@ class Builder
 
 		return $body;
 	}
+    
+    /**
+     * Handle dynamic method calls into the model.
+     *
+     * @param  string  $method
+     * @param  array  $parameters
+     * @return mixed
+     */
+	public function __call($method, $parameters)
+    {
+        return $this->forwardCallTo(new EloquentBuilder($this), $method, $parameters);
+    }
 }

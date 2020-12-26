@@ -53,7 +53,7 @@ class CreateIndex extends Command
             $index->create();
 
             $this->line("\n");
-            $this->info("Successfully created index '{$this->indexName}' 🚀.");
+            $this->info("Successfully created index '{$this->indexName}'.");
             $this->line("\n");
         }
         catch (\Throwable $th)
@@ -69,7 +69,7 @@ class CreateIndex extends Command
         if ($this->option('recreate'))
             return $index->delete();
 
-        if ($this->confirm("Index {$this->indexName} already exists. Do you want to recreate it?"))
+        if ($this->confirm("Index '{$this->indexName}' already exists. Do you want to recreate it?"))
             return $index->delete();
 
         throw new \Exception("Command cancelled");
