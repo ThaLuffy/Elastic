@@ -51,7 +51,7 @@ class CreateIndex extends Command
                 $this->recreateIndexOption($index);
 
             $this->line("\n");
-            $this->info("Successfully created index '{$indexName}' 🚀.");
+            $this->info("Successfully created index '{$this->indexName}' 🚀.");
             $this->line("\n");
         }
         catch (\Throwable $th)
