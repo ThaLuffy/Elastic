@@ -56,11 +56,7 @@ class Helpers
             );
         }
 
-        dd($indices);
-
-        static::resources(
-            collect($resources)->sort()->all()
-        );
+        return $indices;
     }
 
     private static function __matchIndex($indexName, $indexPath)
