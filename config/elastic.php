@@ -11,7 +11,7 @@ return [
     |
 	*/
     
-    'indices_folders' => [
+    'index_folders' => [
         'Indices'
     ],
 

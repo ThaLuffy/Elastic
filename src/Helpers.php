@@ -20,10 +20,10 @@ class Helpers
 
     public static function getIndexByName($indexName)
     {
-        $indicesFolders = config('elastic.indices_folder');
-        $indices        = config('elastic.indices');
+        $indexFolders = config('elastic.index_folders');
+        $indices      = config('elastic.indices');
 
-        dd($indicesFolder, $indices, self::indicesIn(app_path($indicesFolders[0])));
+        dd($indexFolders, $indices, self::indicesIn(app_path($indexFolders[0])));
 
         foreach ($indices as $indexPath) {
             if ($index_name == class_basename($indexPath)) {
