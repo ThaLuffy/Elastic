@@ -47,15 +47,15 @@ class Helpers
 
         $indices = [];
 
-        dd($namespace, $directory);
-
-        foreach ((new Finder)->in($directory)->files() as $resource) {
-            $resource = $namespace.str_replace(
+        foreach ((new Finder)->in($directory)->files() as $index) {
+            $indices[] = $namespace.str_replace(
                 ['/', '.php'],
                 ['\\', ''],
-                Str::after($resource->getPathname(), app_path().DIRECTORY_SEPARATOR)
+                Str::after($index->getPathname(), app_path().DIRECTORY_SEPARATOR)
             );
         }
+
+        dd($indices);
 
         static::resources(
             collect($resources)->sort()->all()
