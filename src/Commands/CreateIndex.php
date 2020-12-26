@@ -42,17 +42,27 @@ class CreateIndex extends Command
         try
         {
             $index = Helpers::getIndexByName($this->argument('index'));
-            $index->createIndex($this->option('recreate'));
+            
+            if ($index->exists())
+                $this->recreateIndexOption($index);
 
             $this->line("\n");
             $this->info("Successfully created index '{$index->getIndexName()}' 🚀.");
             $this->line("\n");
         }
-        catch (\Exception $e)
+        catch (\Throwable $th)
         {
             $this->line("\n");
-            $this->error($e->getMessage());
+            $this->error($th->getMessage());
             $this->line("\n");
         }
+    }
+
+    private function recreateIndexOption($index)
+    {
+        if ($this->option('recreate') || $this->confirm('This index already exists. Do you want to recreate it?'))
+            return $this->index->delete();
+
+        throw new \Exception("Command cancelled");
     }
 }

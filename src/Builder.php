@@ -57,13 +57,11 @@ class Builder
 	}
 
 	/**
-	 * Creates an index
+	 * Creates the index
 	 * 
 	 * @return mixed
 	 */
-    public function createIndex($recreate = FALSE) {
-    	$recreate && $this->deleteIndex();
-
+    public function create() {
     	$params = [
 		    'index' => $this->index->getIndexName(),
 		    'body'  => [
@@ -79,17 +77,33 @@ class Builder
 	}
 
 	/**
-	 * Deletes the index by indexName
+	 *  Returns true if the the index already exists
 	 * 
-	 * @return mixed
+	 * @return bool
 	 */
-    public function deleteIndex()
-    {
-    	$deleteParams = [
+	public function exists() : bool
+	{
+		$params = [
 		    'index' => $this->index->getIndexName(),
 		];
 
-		$response = Client::indices()->delete($deleteParams);
+		$response = Client::indices()->delete($params);
+
+		return $response;
+	}
+
+	/**
+	 * Deletes the index
+	 * 
+	 * @return mixed
+	 */
+    public function delete()
+    {
+    	$params = [
+		    'index' => $this->index->getIndexName(),
+		];
+
+		$response = Client::indices()->delete($params);
 
 		return $response;
 	}

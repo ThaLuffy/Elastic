@@ -23,7 +23,7 @@ class CreateModel extends Command
 
     protected $name;
 
-    protected $indicesFolder;
+    protected $indexFolder;
 
     /**
      * Create a new command instance.
@@ -36,7 +36,7 @@ class CreateModel extends Command
 
         $this->files = $files;
 
-        $this->indicesFolder = config('elastic.indices_folder');
+        $this->indexFolder = config('elastic.index_folders')[0] ?? 'Indices';
     }
 
     /**
@@ -48,7 +48,7 @@ class CreateModel extends Command
     {
         $this->name = $this->__getNameArgument();
 
-        $path = $this->__makeDirectory(app_path("{$this->indicesFolder}/{$this->name}.php"));
+        $path = $this->__makeDirectory(app_path("{$this->indexFolder}/{$this->name}.php"));
 
         $this->files->put($path, $this->__buildModel());
 
@@ -79,7 +79,7 @@ class CreateModel extends Command
     {
         $replace = [
             ':name'          => $this->name,
-            ':indicesFolder' => $this->indicesFolder,
+            ':indexFolder' => $this->indexFolder,
         ];
 
         $stubPath = __DIR__ . "/../Stubs/IndexModelStub";
