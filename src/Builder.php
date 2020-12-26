@@ -2,27 +2,24 @@
 
 namespace ThaLuffy\Elastic;
 
-use Elasticsearch\ConnectionPool\SniffingConnectionPool;
-
-use ThaLuffy\Elastic\Base\BaseIndex;
 use ThaLuffy\Elastic\Client;
+use ThaLuffy\Elastic\Base\BaseIndex;
+use ThaLuffy\Elastic\Builders\CompoundBuilder;
+
+use Illuminate\Support\Traits\ForwardsCalls;
 
 use Exception;
 use Closure;
 
 class Builder
 {
+	use ForwardsCalls;
+
 	protected $index;
 
-	protected $must		= [];
-
-	protected $filter	= [];
-
-	protected $should	= [];
-
-	protected $mustNot	= [];
-
 	protected $size = 10;
+
+	protected $DSLQuery = [];
 
 	protected $from;
 
@@ -207,45 +204,6 @@ class Builder
 
         return $results['hits']['hits'][0]['_source'];
 	}
-
-	public function must($value)
-	{
-		$this->must = array_merge($this->must, $value);
-
-		return $this;
-	}
-
-	public function filter($value)
-	{
-		$this->filter = array_merge($this->filter, $value);
-
-		return $this;
-	}
-
-	public function should($value)
-	{
-		$this->should = array_merge($this->should, $value);
-
-		return $this;
-	}
-
-	public function mustNot($value)
-	{
-		$this->mustNot = array_merge($this->mustNot, $value);
-
-		return $this;
-	}
-
-	public function isNull($field)
-	{
-		$this->mustNot[] = [
-			'exists' => [
-				'field' => $field
-			]
-		];
-
-		return $this;
-	}
 	
 	public function getBody($json = true)
 	{
@@ -262,9 +220,7 @@ class Builder
 	public function all()
 	{
 		$results = $this->query([
-			'query' => [
-                'match_all' => (object) [],
-            ],
+			'query' => [],
 		]);
 
 		return $this->returnResults($results);
@@ -413,21 +369,21 @@ class Builder
 		return $this;
 	}
 
+	public function setDSLQuery($query)
+	{
+		$this->DSLQuery = $query;
+
+		return $this;
+	}
+
 	private function __createBody() : array
 	{
 		$body = [
 			'size'  => $this->size,
-		];
+			'query' => $this->DSLQuery
+		];	
 
-		if (!isset($this->wheres['must']) && !isset($this->wheres['must_not']))
-			$body['query']['bool']['must'] = [ 'match_all' => new \stdClass ]; 
-
-		$body['query']['bool'] = array_merge($body['query']['bool'] ?? [], $this->wheres ?? []);			
-
-		$this->filters && ($body['query']['filter'] = $this->filters);
-
-		$this->from && ($body['from'] = $this->from);
-
+		$this->from	  && ($body['from'] = $this->from);
 		$this->source && ($body['_source'] = $this->source);
 
 		!empty($this->sort) && ($body['sort'] = $this->sort);
@@ -437,6 +393,11 @@ class Builder
 		$this->aggs && ($body['aggs'] = $this->aggs);
 
 		return $body;
+	}
+
+	private function __newCompoundBuilder()
+	{
+		return new CompoundBuilder($this);
 	}
     
     /**
@@ -448,6 +409,6 @@ class Builder
      */
 	public function __call($method, $parameters)
     {
-        return $this->forwardCallTo(new EloquentBuilder($this), $method, $parameters);
+        return $this->forwardCallTo($this->__newCompoundBuilder(), $method, $parameters);
     }
 }

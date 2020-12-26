@@ -1,20 +1,22 @@
 <?php
 
-namespace ThaLuffy\Elastic;
+namespace ThaLuffy\Elastic\Builders;
 
 use Illuminate\Support\Traits\ForwardsCalls;
 
 class EloquentBuilder
 {
+	use ForwardsCalls;
+
     protected $builder;
     
     protected $filter   = [];
 
     protected $mustNot  = [];
 
-    public function __construct(Builder $builder)
+    public function __construct(CompoundBuilder $builder)
     {
-        $this->builder = $builder;
+		$this->builder = $builder;
     }
 
 	public function where($field, $operator = null, $value = null)
@@ -187,13 +189,13 @@ class EloquentBuilder
      * @param  array  $value
      * @return $this
      */
-    public function whereBetween($field, array $value)
+    public function whereBetween($field, array $values)
     {
         $this->filter[] = [
             'range' => [
                 $field => [
-                    'gte' => $value[0],
-                    'lte' => $value[1],
+                    'gte' => $values[0],
+                    'lte' => $values[1],
                 ],
             ],
         ];
@@ -201,15 +203,18 @@ class EloquentBuilder
         return $this;
 	}
     
-    // /**
-    //  * Handle dynamic method calls into the model.
-    //  *
-    //  * @param  string  $method
-    //  * @param  array  $parameters
-    //  * @return mixed
-    //  */
-	// public function __call($method, $parameters)
-    // {
-    //     return $this->forwardCallTo($this->builder, $method, $parameters);
-    // }
+    /**
+     * Handle dynamic method calls into the model.
+     *
+     * @param  string  $method
+     * @param  array  $parameters
+     * @return mixed
+     */
+	public function __call($method, $parameters)
+    {
+		$this->builder->filter($this->filter);
+		$this->builder->mustNot($this->mustNot);
+
+        return $this->forwardCallTo($this->builder, $method, $parameters);
+    }
 }
