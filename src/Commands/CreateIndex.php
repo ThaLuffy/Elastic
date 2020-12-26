@@ -67,10 +67,10 @@ class CreateIndex extends Command
     private function __deleteIndex($index)
     {
         if ($this->option('recreate'))
-            return $this->index->delete();
+            return $index->delete();
 
         if ($this->confirm("Index {$this->indexName} already exists. Do you want to recreate it?"))
-            return $this->index->delete();
+            return $index->delete();
 
         throw new \Exception("Command cancelled");
     }
