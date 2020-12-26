@@ -3,6 +3,8 @@
 namespace ThaLuffy\Elastic;
 
 use ThaLuffy\Elastic\Models\IndexLog;
+use Symfony\Component\Finder\Finder;
+use ReflectionClass;
 
 class Helpers
 {
@@ -18,8 +20,10 @@ class Helpers
 
     public static function getIndexByName($indexName)
     {
-        $indicesFolder = config('elastic.indices_folder');
-        $indices       = config('elastic.indices');
+        $indicesFolders = config('elastic.indices_folder');
+        $indices        = config('elastic.indices');
+
+        dd($indicesFolder, $indices, self::indicesIn(app_path($indicesFolders[0])));
 
         foreach ($indices as $indexPath) {
             if ($index_name == class_basename($indexPath)) {
@@ -35,5 +39,26 @@ class Helpers
         }
 
         throw new \Exception('Index not found');
+    }
+
+    public static function indicesIn($directory)
+    {
+        $namespace = app()->getNamespace();
+
+        $indices = [];
+
+        dd($namespace, $directory);
+
+        foreach ((new Finder)->in($directory)->files() as $resource) {
+            $resource = $namespace.str_replace(
+                ['/', '.php'],
+                ['\\', ''],
+                Str::after($resource->getPathname(), app_path().DIRECTORY_SEPARATOR)
+            );
+        }
+
+        static::resources(
+            collect($resources)->sort()->all()
+        );
     }
 }

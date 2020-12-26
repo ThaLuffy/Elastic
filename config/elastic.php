@@ -11,7 +11,9 @@ return [
     |
 	*/
     
-    'indices_folder' => 'Indices',
+    'indices_folders' => [
+        'Indices'
+    ],
 
 
     /*
@@ -19,7 +21,7 @@ return [
     | Indices
     |--------------------------------------------------------------------------
     |
-    | Register your indices.
+    | If you don't want to use folders, you can register your indices here.
     |
 	*/
     
