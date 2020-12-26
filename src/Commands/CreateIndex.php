@@ -48,7 +48,9 @@ class CreateIndex extends Command
             $this->indexName = $index->getIndexName();
             
             if ($index->exists())
-                $this->recreateIndexOption($index);
+                $this->__deleteIndex($index);
+
+            $index->create();
 
             $this->line("\n");
             $this->info("Successfully created index '{$this->indexName}' 🚀.");
@@ -62,7 +64,7 @@ class CreateIndex extends Command
         }
     }
 
-    private function recreateIndexOption($index)
+    private function __deleteIndex($index)
     {
         if ($this->option('recreate'))
             return $this->index->delete();
