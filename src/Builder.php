@@ -87,7 +87,7 @@ class Builder
 		    'index' => $this->index->getIndexName(),
 		];
 
-		$response = Client::indices()->delete($params);
+		$response = Client::indices()->exists($params);
 
 		return $response;
 	}
