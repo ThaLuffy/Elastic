@@ -4,7 +4,9 @@ namespace ThaLuffy\Elastic;
 
 use ThaLuffy\Elastic\Models\IndexLog;
 use Symfony\Component\Finder\Finder;
+
 use ReflectionClass;
+use Str;
 
 class Helpers
 {
