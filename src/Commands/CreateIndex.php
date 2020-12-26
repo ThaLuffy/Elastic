@@ -22,6 +22,8 @@ class CreateIndex extends Command
      */
     protected $description = 'Create ES index';
 
+    protected $indexName;
+
     /**
      * Create a new command instance.
      *
@@ -42,12 +44,14 @@ class CreateIndex extends Command
         try
         {
             $index = Helpers::getIndexByName($this->argument('index'));
+
+            $this->indexName = $index->getIndexName();
             
             if ($index->exists())
                 $this->recreateIndexOption($index);
 
             $this->line("\n");
-            $this->info("Successfully created index '{$index->getIndexName()}' 🚀.");
+            $this->info("Successfully created index '{$indexName}' 🚀.");
             $this->line("\n");
         }
         catch (\Throwable $th)
@@ -60,7 +64,10 @@ class CreateIndex extends Command
 
     private function recreateIndexOption($index)
     {
-        if ($this->option('recreate') || $this->confirm('This index already exists. Do you want to recreate it?'))
+        if ($this->option('recreate'))
+            return $this->index->delete();
+
+        if ($this->confirm("Index {$this->indexName} already exists. Do you want to recreate it?"))
             return $this->index->delete();
 
         throw new \Exception("Command cancelled");
