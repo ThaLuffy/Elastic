@@ -26,11 +26,10 @@ trait Indexable {
         return $this->bulkSize ?? config('es.default.bulkSize');
     }
 
-    public function getIndexRecords($from = 0, $bulkSize): array
+    public function getIndexQueryBuilder(): array
     {
         return [
-            self::when($from, function($q) use ($from) { return $q->where($this->getKeyName(), '>', $from); })
-                ->limit($bulkSize ?? $this->getBulkSize())->orderBy($this->getKeyName(), 'asc')->get()
+            self::select('*')
         , null];
     }
 

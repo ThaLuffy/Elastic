@@ -9,9 +9,11 @@ use ThaLuffy\Elastic\Helpers;
 
 class IndexRecords extends Command
 {
+    protected $currentAllRecordsCount;
     protected $currentTotalCount;
     protected $currentTotalDuration;
     protected $currentRecordsIndexed;
+    protected $jobId;
 
     /**
      * The name and signature of the console command.
@@ -55,11 +57,10 @@ class IndexRecords extends Command
         $isMonitoring   = $this->option('monitor');
         $from           = $this->option('from')  ? intval($this->option('from'))  : 0;
         $limit          = $this->option('limit') ? intval($this->option('limit')) : null;
-        $index          = Helpers::getIndexByName($this->argument('index'));
+        $index          = $this->__getIndex();
         $monitor        = new Monitoring();
 
         foreach ($index->getLinkedModels() as $model) {
-            $recordsIndexed = 0;
             $model = new $model();
             $modelName = class_basename($model);
 
@@ -67,9 +68,12 @@ class IndexRecords extends Command
             $this->info("Indexing $modelName model");
 
             $this->info("Getting total number of records...");
-            $this->currentTotalCount     = $model->count();
-            $this->currentTotalDuration  = 0;
-            $this->currentRecordsIndexed = 0;
+            [$queryBuilder, $meta]        = $model->getIndexQueryBuilder();
+            $this->currentAllRecordsCount = $queryBuilder->count();
+            $this->currentTotalCount      = $queryBuilder->when($from, fn ($q) => $q->where($model->getKeyName(), '>', $from))->count();
+            $this->currentTotalDuration   = 0;
+            $this->currentRecordsIndexed  = 0;
+            $this->jobId                  = (string) \Str::uuid();
 
             $this->info("Total number of records: {$this->currentTotalCount}");
 
@@ -79,8 +83,16 @@ class IndexRecords extends Command
                 $monitor->startTimer('duration');
 
                 $isMonitoring && $monitor->startTimer('getRecords');
-                [$records, $meta]   = $model->getIndexRecords($from, $limit);
-                $count              = count($records);
+                [$queryBuilder, $meta] = $model->getIndexQueryBuilder();
+
+                $records = $queryBuilder
+                    ->when($from, fn ($q) => $q->where($model->getKeyName(), '>', $from))
+                    ->limit($limit ?? $model->getBulkSize())
+                    ->orderBy($model->getKeyName(), 'asc')
+                    ->get();
+
+                $count = count($records);
+                
                 $isMonitoring && $monitor->endTimer('getRecords');
                 
                 $actionCounts       = [
@@ -120,7 +132,6 @@ class IndexRecords extends Command
                     
                     unset($params);
                     
-                    // ADD LOGGING
                     if ($response['errors']) {
                         if ($this->option('dump-errors', false)) 
                             dd($response['items']);
@@ -136,12 +147,12 @@ class IndexRecords extends Command
                         
                         if ($errorBatch->count())
                             Helpers::getIndexLogModel()::insert($errorBatch->map(fn ($value) => [
-                                    'document_id' => $value['_id'],
-                                    'status'      => $value['status'],
-                                    'index'       => $value['_index'],
-                                    'type'        => $value['error']['type'],
-                                    'reason'      => $value['error']['reason'],
-                                ]) ->toArray());
+                                'document_id' => $value['_id'],
+                                'status'      => $value['status'],
+                                'index'       => $value['_index'],
+                                'type'        => $value['error']['type'],
+                                'reason'      => $value['error']['reason'],
+                            ]) ->toArray());
                     }
                     
 
@@ -160,10 +171,6 @@ class IndexRecords extends Command
                                 $actionCounts['created']++;
                                 break;
 
-                            case 'create': 
-                                $actionCounts['created']++;
-                                break;
-
                             case 'update':
                                 if     ($value['update']['result'] === 'noop')    $actionCounts['skipped']++;
                                 elseif ($value['update']['result'] === 'updated') $actionCounts['updated']++;
@@ -173,7 +180,6 @@ class IndexRecords extends Command
 
                     unset($response);
                 }
-
                 
                 $monitor->endTimer('duration');
                 $duration = $monitor->getData('duration');
@@ -186,7 +192,9 @@ class IndexRecords extends Command
                     else return null;
                 })->reject(fn ($value) => !$value)->implode(', ');
 
-                $this->comment("$modelName: $count records indexed in {$duration}s (total: {$this->currentRecordsIndexed}, $actionCountString, last ID: $from)");
+                $timeRemaningString = $this->__getTimeRemaningString();
+
+                $this->comment("$modelName: $count records indexed in {$duration}s (total: {$this->currentRecordsIndexed}, $actionCountString, last ID: $from, $timeRemaningString)");
 
                 if ($isMonitoring) {
                     $this->line('<fg=white>' . collect($monitor->getOutput())->map(fn ($v, $k) => "$k: {$v}s")->implode(', ') . '</>');
@@ -202,14 +210,66 @@ class IndexRecords extends Command
 
     public function handleCancel()
     {
-        $multiplier = $this->currentTotalCount / $this->currentRecordsIndexed;
-        $eta        = $this->currentTotalDuration * $multiplier;
-        $seconds    = $eta % 60;
-        $minutes    = ($eta / 60) % 60;
-        $hours      = floor($eta / 3600);
+        $multiplier        = $this->currentAllRecordsCount / $this->currentRecordsIndexed;
+        $timeForAllRecords = $this->currentTotalDuration * $multiplier;
 
-        $this->info("Estimated duration for all records: $hours:$minutes:$seconds");
+        [$tHours, $tMinutes, $tSeconds] = $this->__calcTimeHMS($timeForAllRecords);
+        $this->info("Estimated duration for all records: $tHours:$tMinutes:$tSeconds");
 
         dd("Command cancelled");
+    }
+
+    private function __getTimeRemaningString() : string
+    {
+        if (!$this->currentRecordsIndexed)
+            return "Time remaning: calculating...";
+
+        $avgTimePerRecord  = $this->currentTotalDuration / $this->currentRecordsIndexed;
+        $remaningRecords   = $this->currentTotalCount - $this->currentRecordsIndexed;
+        $timeRemaning      = $avgTimePerRecord * $remaningRecords;
+
+        [$hours, $minutes, $seconds] = $this->__calcTimeHMS($timeRemaning);
+
+        return "Time remaning: $hours:$minutes:$seconds";
+    }
+
+    private function __calcTimeHMS($secToCalc) : array
+    {
+        $seconds    = str_pad($secToCalc % 60, 2, "0", STR_PAD_LEFT);
+        $minutes    = str_pad(($secToCalc / 60) % 60, 2, "0", STR_PAD_LEFT);
+        $hours      = str_pad(floor($secToCalc / 3600), 2, "0", STR_PAD_LEFT);
+
+        return [$hours, $minutes, $seconds];
+    }
+
+    private function __getIndex()
+    {
+        $indices     = config('es.indices');
+        $index_name  = $this->argument('index');
+        $index       = NULL;
+
+        foreach ($indices as $indexPath) {
+            if ($index_name == class_basename($indexPath)) {
+                $index = new $indexPath();
+                break;
+            }
+        }
+
+        if (!$index) {
+            foreach ($indices as $indexPath) {
+                $index = new $indexPath();
+
+                if ($index->getIndexName() == $index_name)
+                    break;
+                else
+                    $index = NULL;
+            }
+        }
+
+        if (!$index) {
+            throw new \Exception('Index not found');
+        }
+
+        return $index;
     }
 }
