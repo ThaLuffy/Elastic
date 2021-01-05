@@ -27,6 +27,8 @@ class ServiceProvider extends BaseServiceProvider
             CreateModel::class,
         ]);
 
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+
         $this->publishes([
             $this->__migrationPath() => database_path('migrations')
         ], 'migrations');
