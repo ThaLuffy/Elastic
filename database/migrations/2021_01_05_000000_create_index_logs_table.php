@@ -32,6 +32,6 @@ class CreateIndexLogsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('indexing_logs');
+        Schema::dropIfExists('index_logs');
     }
 }
