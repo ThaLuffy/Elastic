@@ -20,7 +20,7 @@ class IndexRecords extends Command
      *
      * @var string
      */
-    protected $signature = 'elastic:index {index} {--limit=} {--from=} {--monitor} {--dump-errors}';
+    protected $signature = 'elastic:index {index} {--limit=} {--from=} {--monitor} {--dump-errors} {--easy-count}';
 
     /**
      * The console command description.
@@ -55,7 +55,8 @@ class IndexRecords extends Command
         }
 
         $isMonitoring   = $this->option('monitor');
-        $from           = $this->option('from')  ? intval($this->option('from'))  : 0;
+        $easyCount      = $this->option('easy-count');
+        $from           = $this->option('from')  ? $this->option('from') : 0;
         $limit          = $this->option('limit') ? intval($this->option('limit')) : null;
         $index          = Helpers::getIndexByName($this->argument('index'));
         $monitor        = new Monitoring();
@@ -69,8 +70,8 @@ class IndexRecords extends Command
 
             $this->info("Getting total number of records...");
             [$queryBuilder, $meta]        = $model->getIndexQueryBuilder();
-            $this->currentAllRecordsCount = $queryBuilder->count();
-            $this->currentTotalCount      = $queryBuilder->when($from, fn ($q) => $q->where($model->getKeyName(), '>', $from))->count();
+            $this->currentAllRecordsCount = $easyCount ? $model->count() : $queryBuilder->count();
+            $this->currentTotalCount      = $easyCount ? $model->count() : $queryBuilder->when($from, fn ($q) => $q->where($model->getKeyName(), '>', $from))->count();
             $this->currentTotalDuration   = 0;
             $this->currentRecordsIndexed  = 0;
             $this->jobId                  = (string) \Str::uuid();
@@ -100,6 +101,7 @@ class IndexRecords extends Command
                     'updated' => 0,
                     'deleted' => 0,
                     'skipped' => 0,
+                    'errors'  => 0,
                 ];
                 $params             = [
                     'index'  => [],
@@ -110,7 +112,7 @@ class IndexRecords extends Command
 
                 if (!$count) break;
 
-                $isMonitoring && $monitor->startTimer('createInsertData');
+                $isMonitoring && $monitor->startTimer('createIndexDocuments');
                 foreach ($records as $record) {
                     $indexData = $record->sendIndexData($meta, $params);
 
@@ -118,7 +120,7 @@ class IndexRecords extends Command
                         $params[$type] = array_merge($params[$type], $values);
                     }
                 };
-                $isMonitoring && $monitor->endTimer('createInsertData');
+                $isMonitoring && $monitor->endTimer('createIndexDocuments');
 
                 $from = $records->last()->{ $model->getKeyName() };
 
@@ -145,7 +147,9 @@ class IndexRecords extends Command
                             }
                         }
                         
-                        if ($errorBatch->count())
+                        $errorCount = $errorBatch->count();
+
+                        if ($errorCount) {
                             Helpers::getIndexLogModel()::insert($errorBatch->map(fn ($value) => [
                                 'document_id' => $value['_id'],
                                 'status'      => $value['status'],
@@ -153,6 +157,9 @@ class IndexRecords extends Command
                                 'type'        => $value['error']['type'],
                                 'reason'      => $value['error']['reason'],
                             ]) ->toArray());
+
+                            $actionCounts['errors'] += $errorCount;
+                        }
                     }
                     
 
