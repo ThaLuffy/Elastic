@@ -57,7 +57,7 @@ class IndexRecords extends Command
         $isMonitoring   = $this->option('monitor');
         $from           = $this->option('from')  ? intval($this->option('from'))  : 0;
         $limit          = $this->option('limit') ? intval($this->option('limit')) : null;
-        $index          = $this->__getIndex();
+        $index          = Helpers::getIndexByName($this->argument('index'));
         $monitor        = new Monitoring();
 
         foreach ($index->getLinkedModels() as $model) {
@@ -240,36 +240,5 @@ class IndexRecords extends Command
         $hours      = str_pad(floor($secToCalc / 3600), 2, "0", STR_PAD_LEFT);
 
         return [$hours, $minutes, $seconds];
-    }
-
-    private function __getIndex()
-    {
-        $indices     = config('es.indices');
-        $index_name  = $this->argument('index');
-        $index       = NULL;
-
-        foreach ($indices as $indexPath) {
-            if ($index_name == class_basename($indexPath)) {
-                $index = new $indexPath();
-                break;
-            }
-        }
-
-        if (!$index) {
-            foreach ($indices as $indexPath) {
-                $index = new $indexPath();
-
-                if ($index->getIndexName() == $index_name)
-                    break;
-                else
-                    $index = NULL;
-            }
-        }
-
-        if (!$index) {
-            throw new \Exception('Index not found');
-        }
-
-        return $index;
     }
 }
