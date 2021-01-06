@@ -151,6 +151,7 @@ class IndexRecords extends Command
 
                         if ($errorCount) {
                             Helpers::getIndexLogModel()::insert($errorBatch->map(fn ($value) => [
+                                'job_id'      => $this->jobId,
                                 'document_id' => $value['_id'],
                                 'status'      => $value['status'],
                                 'index'       => $value['_index'],
