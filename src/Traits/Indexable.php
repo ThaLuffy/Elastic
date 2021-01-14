@@ -12,6 +12,11 @@ trait Indexable {
         });
     }
 
+    public function addMetaData($iterationResults)
+    {
+        return null;
+    }
+
     public function updateIndex()
     {
         if (!$this->index) throw new \Exception("Protected value 'index' missing from model.");
@@ -26,11 +31,9 @@ trait Indexable {
         return $this->bulkSize ?? config('es.default.bulkSize');
     }
 
-    public function getIndexQueryBuilder(): array
+    public function getIndexQueryBuilder()
     {
-        return [
-            self::select('*')
-        , null];
+        return self::select('*');
     }
 
     public function toIndexArray($meta)
@@ -38,7 +41,7 @@ trait Indexable {
         return $this->toArray();
     }
 
-    public function sendIndexData($meta = [], &$currentParams)
+    public function sendIndexData($meta, &$currentParams)
     {
         $document = $this->toIndexArray($meta);
 

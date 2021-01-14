@@ -69,7 +69,7 @@ class IndexRecords extends Command
             $this->info("Indexing $modelName model");
 
             $this->info("Getting total number of records...");
-            [$queryBuilder, $meta]        = $model->getIndexQueryBuilder();
+            $queryBuilder                 = $model->getIndexQueryBuilder();
             $this->currentAllRecordsCount = $easyCount ? $model->count() : $queryBuilder->count();
             $this->currentTotalCount      = $easyCount ? $model->count() : $queryBuilder->when($from, fn ($q) => $q->where($model->getKeyName(), '>', $from))->count();
             $this->currentTotalDuration   = 0;
@@ -84,13 +84,15 @@ class IndexRecords extends Command
                 $monitor->startTimer('duration');
 
                 $isMonitoring && $monitor->startTimer('getRecords');
-                [$queryBuilder, $meta] = $model->getIndexQueryBuilder();
+                $queryBuilder = $model->getIndexQueryBuilder();
 
                 $records = $queryBuilder
                     ->when($from, fn ($q) => $q->where($model->getKeyName(), '>', $from))
                     ->limit($limit ?? $model->getBulkSize())
                     ->orderBy($model->getKeyName(), 'asc')
                     ->get();
+
+                $meta = $model->addMetaData($records);
 
                 $count = count($records);
                 
