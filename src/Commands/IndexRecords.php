@@ -56,7 +56,7 @@ class IndexRecords extends Command
 
         $isMonitoring   = $this->option('monitor');
         $easyCount      = $this->option('easy-count');
-        $limit          = $this->option('limit') ? intval($this->option('limit')) : null;
+        $limit          = $this->option('limit') ? intval($this->option('limit')) : 100;
         $index          = Helpers::getIndexByName($this->argument('index'));
         $monitor        = new Monitoring();
 
