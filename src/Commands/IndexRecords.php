@@ -56,13 +56,13 @@ class IndexRecords extends Command
 
         $isMonitoring   = $this->option('monitor');
         $easyCount      = $this->option('easy-count');
-        $from           = $this->option('from')  ? $this->option('from') : 0;
         $limit          = $this->option('limit') ? intval($this->option('limit')) : null;
         $index          = Helpers::getIndexByName($this->argument('index'));
         $monitor        = new Monitoring();
 
         foreach ($index->getLinkedModels() as $model) {
-            $model = new $model();
+            $from      = $this->option('from') ? $this->option('from') : 0;
+            $model     = new $model();
             $modelName = class_basename($model);
 
             $this->line("");
