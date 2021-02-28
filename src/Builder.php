@@ -176,12 +176,16 @@ class Builder
 		return $response;
     }
 
-    public function query($body)
+    public function query($body, $async = FALSE)
     {
     	$params = [
     		'index' => $this->index->getIndexName(),
 			'body' 	=> $body,
             'track_total_hits' => true
+		];
+
+		$async && $params['client'] = [
+				'future' => 'lazy',
 		];
 		
 		$response = Client::search($params);
